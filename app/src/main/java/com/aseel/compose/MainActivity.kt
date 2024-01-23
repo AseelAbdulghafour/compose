@@ -2,6 +2,8 @@ package com.aseel.compose
 
 
 
+
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,9 +18,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
+
 import com.aseel.compose.ui.theme.ComposeTheme
 
 data class Question(val text: String, val isCorrect: Boolean)
@@ -49,6 +58,7 @@ fun TrueFalseGame() {
     var userScore = remember { mutableStateOf(0) }
     var showResetButton by remember { mutableStateOf(false) }
 
+
     if (questions.isEmpty()) {
         questions = listOf(
             Question("Butterflies taste things with their wings?", false),
@@ -72,8 +82,10 @@ fun TrueFalseGame() {
 
 //the condition of the correct answer
         if (AnsrCorrect && showFeedback ) {
-            AnswerFeedback("Correct!", MaterialTheme.colorScheme.secondary)
+            AnswerFeedback("Correct!", MaterialTheme.colorScheme.secondary, true)
+            //CorrectAnswerImage()
             Text(text = "Score: ${userScore.value}")
+
             Button(
                 onClick = {
                     showFeedback = false
@@ -81,7 +93,7 @@ fun TrueFalseGame() {
                     // Move to the next question or show the final score
                     if (currentQuestionIndex.value == questions.size - 1) {
                         showResetButton = true
-                        //showAnswerOptionsRow = false
+
                         AnsrCorrect = false
                     }
 
@@ -102,7 +114,8 @@ fun TrueFalseGame() {
             // Keep true and false buttons visible
             showFeedback = true
             // Show feedback for wrong answer
-            AnswerFeedback("Wrong!", MaterialTheme.colorScheme.error)
+            AnswerFeedback("Wrong!", MaterialTheme.colorScheme.error, false)
+            //WrongAnswerImage()
 
         }
 
@@ -136,10 +149,8 @@ fun TrueFalseGame() {
 
         if (showResetButton) {
             showAnswerOptionsRow = false
-
-            showAnswerOptionsRow = false
             Button(onClick = {
-
+                showAnswerOptionsRow = true
                 showResetButton = false
 
                 // Show the final score and restart button
@@ -173,36 +184,38 @@ fun TrueFalseButton(text: String, showAnswerOptionsRow: () -> Unit) {
 }
 
 @Composable
-fun AnswerFeedback(message: String, backgroundColor: androidx.compose.ui.graphics.Color) {
+fun AnswerFeedback(message: String, backgroundColor: Color, isCorrect: Boolean) {
     Box(
         modifier = Modifier
-
-
             .size(100.dp)
             .clip(CircleShape)
-            .clip(MaterialTheme.shapes.large)
             .background(backgroundColor)
             .padding(16.dp),
-        Alignment.Center
-
-        // contentAlignment = Alignment.Center
-
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-
-            horizontalAlignment = Alignment.CenterHorizontally
-
-
-        ) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimary
-
-            )
+        // Show the correct or wrong answer image based on the 'isCorrect' parameter
+        val imagePainter = if (isCorrect) {
+            painterResource(id = R.drawable.correct_answer)
+        } else {
+            painterResource(id = R.drawable.wrong_answer)
         }
+
+        Image(
+            painter = imagePainter,
+            contentDescription = if (isCorrect) "Correct Answer Image" else "Wrong Answer Image",
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Text(
+            text = message,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
